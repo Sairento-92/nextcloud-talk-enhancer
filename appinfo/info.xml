@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<info xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
+    <id>talk_enhancer</id>
+    <name>Talk Enhancer (Fork by Sairento)</name>
+    <summary>Huriko Talk Enhancements: Atom One Dark syntax highlighting, smart paste, call protection &amp; branding</summary>
+    <description>Fork by Sairento for Huriko Cloud (cloud.huriko.com). Enhances Nextcloud Talk with:
+    - Atom One Dark syntax highlighting for 190+ programming languages (Python, JavaScript, TypeScript, PowerShell, SQL, Bash, C++, Rust, Go, etc.)
+    - Copy to clipboard button on every code block
+    - Language badges (PYTHON, POWERSHELL, SQL, etc.)
+    - Smart code paste that auto-detects code snippets and wraps them into markdown blocks
+    - Default Original Image Quality for screenshots and diagrams (Issue #19616 / PR #19919)
+    - File drag-and-drop fix ensuring original files are downloaded (Issue #1766)
+    - In-call privacy protections preventing accidental mic leaks on close (Issue #2003)
+    - Web hotkeys (M to mute, V for camera, / to chat)
+    </description>
+    <version>1.1.0</version>
+    <licence>agpl</licence>
+    <author>Sairento / Huriko</author>
+    <namespace>TalkEnhancer</namespace>
+    <category>tools</category>
+    <category>multimedia</category>
+    <dependencies>
+        <nextcloud min-version="25" max-version="35"/>
+    </dependencies>
+</info>
