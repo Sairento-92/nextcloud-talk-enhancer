@@ -149,8 +149,66 @@ function enhanceCodeBlocks(root = document) {
 				})
 			})
 
+			// Download code snippet button
+			const downloadBtn = document.createElement('button')
+			downloadBtn.className = 'talk-download-code-btn'
+			downloadBtn.type = 'button'
+			downloadBtn.title = 'Pobierz jako plik'
+			downloadBtn.innerText = '💾 Pobierz'
+
+			downloadBtn.addEventListener('click', (e) => {
+				e.stopPropagation()
+				const extMap = {
+					python: 'py', javascript: 'js', typescript: 'ts', bash: 'sh', powershell: 'ps1',
+					sql: 'sql', html: 'html', css: 'css', scss: 'scss', json: 'json', php: 'php',
+					c: 'c', cpp: 'cpp', csharp: 'cs', java: 'java', kotlin: 'kt', go: 'go', rust: 'rs',
+					yaml: 'yaml', markdown: 'md', diff: 'diff', xml: 'xml', lua: 'lua', ini: 'ini'
+				}
+				const ext = extMap[highlighted.lang] || 'txt'
+				const filename = `snippet_${highlighted.lang || 'code'}.${ext}`
+				const blob = new Blob([rawText], { type: 'text/plain;charset=utf-8' })
+				const url = URL.createObjectURL(blob)
+				const a = document.createElement('a')
+				a.href = url
+				a.download = filename
+				document.body.appendChild(a)
+				a.click()
+				document.body.removeChild(a)
+				URL.revokeObjectURL(url)
+			})
+
+			headerBar.appendChild(downloadBtn)
 			headerBar.appendChild(copyBtn)
 			preEl.insertBefore(headerBar, preEl.firstChild)
+
+			// Collapse/Fold long code blocks (> 15 lines)
+			const lines = rawText.split('\n')
+			if (lines.length > 15 && !preEl.querySelector('.talk-expand-code-bar')) {
+				preEl.classList.add('talk-code-collapsed')
+				const expandBar = document.createElement('div')
+				expandBar.className = 'talk-expand-code-bar'
+				const expandBtn = document.createElement('button')
+				expandBtn.className = 'talk-expand-code-btn'
+				expandBtn.innerText = `▼ Rozwiń kod (${lines.length} linii)`
+				let expanded = false
+				expandBtn.onclick = (e) => {
+					e.stopPropagation()
+					expanded = !expanded
+					if (expanded) {
+						preEl.classList.remove('talk-code-collapsed')
+						expandBtn.innerText = '▲ Zwiń kod'
+						expandBar.style.position = 'relative'
+						expandBar.style.height = '32px'
+					} else {
+						preEl.classList.add('talk-code-collapsed')
+						expandBtn.innerText = `▼ Rozwiń kod (${lines.length} linii)`
+						expandBar.style.position = 'absolute'
+						expandBar.style.height = '52px'
+					}
+				}
+				expandBar.appendChild(expandBtn)
+				preEl.appendChild(expandBar)
+			}
 		}
 	})
 }
@@ -590,6 +648,106 @@ function setupDashboardWidgetSafety() {
 }
 
 /**
+ * Voice Message playback speed control (1x, 1.25x, 1.5x, 2x)
+ */
+function setupVoiceMessageSpeedControl() {
+	const RATES = [1.0, 1.25, 1.5, 2.0]
+	const observer = new MutationObserver(() => {
+		const audios = document.querySelectorAll('audio:not(.talk-speed-enhanced)')
+		audios.forEach((audio) => {
+			audio.classList.add('talk-speed-enhanced')
+			const parent = audio.closest('.message__audio, .audio-message, .message, div')
+			if (parent && !parent.querySelector('.talk-voice-speed-btn')) {
+				const btn = document.createElement('button')
+				btn.className = 'talk-voice-speed-btn'
+				btn.type = 'button'
+				btn.title = 'Zmień prędkość odtwarzania'
+				let rateIndex = 0
+				btn.innerText = '1x'
+				btn.onclick = (e) => {
+					e.stopPropagation()
+					e.preventDefault()
+					rateIndex = (rateIndex + 1) % RATES.length
+					const newRate = RATES[rateIndex]
+					audio.playbackRate = newRate
+					btn.innerText = `${newRate}x`
+				}
+				if (audio.parentElement) {
+					audio.parentElement.appendChild(btn)
+				}
+			}
+		})
+	})
+	observer.observe(document.body, { childList: true, subtree: true })
+}
+
+/**
+ * Auto-save unsent message drafts per conversation (Drafts Persistence)
+ */
+function setupMessageDraftsPersistence() {
+	let currentToken = ''
+	const getRoomToken = () => {
+		const hash = window.location.hash
+		const m = hash.match(/call\/([a-zA-Z0-9_-]+)/)
+		return m ? m[1] : ''
+	}
+
+	const saveDraft = (text) => {
+		const token = getRoomToken()
+		if (!token) return
+		if (text && text.trim()) {
+			localStorage.setItem('talk_draft_' + token, text)
+		} else {
+			localStorage.removeItem('talk_draft_' + token)
+		}
+	}
+
+	const restoreDraft = () => {
+		const token = getRoomToken()
+		if (!token || token === currentToken) return
+		currentToken = token
+
+		const saved = localStorage.getItem('talk_draft_' + token)
+		if (!saved) return
+
+		setTimeout(() => {
+			const input = document.querySelector('.new-message-form__input, .ProseMirror, textarea[placeholder*="Wiadomość"], textarea[placeholder*="Message"]')
+			if (input && (!input.textContent || !input.textContent.trim())) {
+				if (input.tagName === 'TEXTAREA' || input.tagName === 'INPUT') {
+					input.value = saved
+					input.dispatchEvent(new Event('input', { bubbles: true }))
+				} else {
+					input.innerText = saved
+					input.dispatchEvent(new Event('input', { bubbles: true }))
+				}
+				console.info('[TalkEnhancer] Przywrócono wersję roboczą wiadomości dla pokoju:', token)
+			}
+		}, 300)
+	}
+
+	window.addEventListener('hashchange', restoreDraft)
+	document.addEventListener('input', (e) => {
+		const target = e.target
+		if (target && (target.classList.contains('new-message-form__input') || target.classList.contains('ProseMirror') || target.tagName === 'TEXTAREA')) {
+			saveDraft(target.value || target.innerText || '')
+		}
+	})
+
+	document.addEventListener('submit', () => {
+		const token = getRoomToken()
+		if (token) localStorage.removeItem('talk_draft_' + token)
+	})
+	document.addEventListener('click', (e) => {
+		if (e.target.closest('.new-message-form__button-send, button[type="submit"]')) {
+			const token = getRoomToken()
+			if (token) localStorage.removeItem('talk_draft_' + token)
+		}
+	})
+
+	restoreDraft()
+}
+
+/**
  * Initialize
  */
 function init() {
@@ -608,6 +766,8 @@ function init() {
 	setupScheduledMessageAttachmentGuard()
 	setupDashboardWidgetSafety()
 	setupDefaultConversation()
+	setupVoiceMessageSpeedControl()
+	setupMessageDraftsPersistence()
 	enhanceCodeBlocks()
 
 	const observer = new MutationObserver(() => {

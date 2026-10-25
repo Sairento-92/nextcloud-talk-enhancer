@@ -163,3 +163,86 @@ pre:hover .talk-copy-code-btn {
 	height: 15px;
 	width: auto;
 }
+
+/* Download Snippet & Fold/Expand Buttons */
+.talk-download-code-btn {
+	padding: 3px 8px;
+	font-size: 11px;
+	font-weight: 600;
+	color: #abb2bf;
+	background: rgba(255, 255, 255, 0.12);
+	border: 1px solid rgba(255, 255, 255, 0.18);
+	border-radius: 4px;
+	cursor: pointer;
+	opacity: 0.7;
+	transition: all 0.15s ease-in-out;
+}
+
+pre:hover .talk-download-code-btn {
+	opacity: 1;
+}
+
+.talk-download-code-btn:hover {
+	background: rgba(255, 255, 255, 0.25);
+	color: #ffffff;
+}
+
+.talk-code-collapsed {
+	max-height: 280px !important;
+	overflow: hidden !important;
+}
+
+.talk-expand-code-bar {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	right: 0;
+	height: 52px;
+	background: linear-gradient(to bottom, rgba(40, 44, 52, 0) 0%, rgba(40, 44, 52, 0.95) 80%);
+	display: flex;
+	align-items: flex-end;
+	justify-content: center;
+	padding-bottom: 6px;
+	z-index: 15;
+}
+
+.talk-expand-code-btn {
+	padding: 4px 12px;
+	font-size: 11px;
+	font-weight: 700;
+	color: #61afef;
+	background: #21252b;
+	border: 1px solid #61afef;
+	border-radius: 12px;
+	cursor: pointer;
+	box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+	transition: all 0.15s ease;
+}
+
+.talk-expand-code-btn:hover {
+	background: #61afef;
+	color: #ffffff;
+}
+
+/* Voice Message Speed Toggle Pill */
+.talk-voice-speed-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	padding: 2px 7px;
+	font-size: 11px;
+	font-weight: 700;
+	color: #ffffff;
+	background: rgba(0, 130, 201, 0.85);
+	border: 1px solid rgba(255, 255, 255, 0.2);
+	border-radius: 10px;
+	cursor: pointer;
+	margin-left: 8px;
+	user-select: none;
+	transition: all 0.15s ease;
+}
+
+.talk-voice-speed-btn:hover {
+	background: #0082c9;
+	transform: scale(1.05);
+}
