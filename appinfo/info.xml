@@ -3,18 +3,25 @@
       xsi:noNamespaceSchemaLocation="https://apps.nextcloud.com/schema/apps/info.xsd">
     <id>talk_enhancer</id>
     <name>Talk Enhancer (Fork by Sairento)</name>
-    <summary>Huriko Talk Enhancements: Atom One Dark syntax highlighting, smart paste, call protection &amp; branding</summary>
+    <summary>Huriko Talk Enhancements: AI Ollama Assistant, Webhooks, OCC Console Toolkit, Atom One Dark syntax highlighting &amp; multimedia suite</summary>
     <description>Fork by Sairento for Huriko Cloud (cloud.huriko.com). Enhances Nextcloud Talk with:
-    - Atom One Dark syntax highlighting for 190+ programming languages (Python, JavaScript, TypeScript, PowerShell, SQL, Bash, C++, Rust, Go, etc.)
-    - Copy to clipboard button on every code block
-    - Language badges (PYTHON, POWERSHELL, SQL, etc.)
+    - Server-Side OCC Console Commands:
+      * occ talk:enhancer:stats (activity, messages, room stats and AI connectivity)
+      * occ talk:enhancer:broadcast (send admin announcements to all rooms or selected rooms)
+      * occ talk:enhancer:cleanup (retention policy message purger and cache cleaner)
+      * occ talk:enhancer:export-room (full room export to JSON, Markdown, or HTML)
+    - Incoming Webhooks API (/api/v1/webhook/{token}) for Home Assistant, GitHub, Zabbix, and Bash alerts
+    - Local AI Assistant (/api/v1/ai/ask) with Ollama / LocalAI integration and /ai command in chat
+    - Data Loss Prevention (DLP) scanner detecting exposed private keys, API tokens, and credentials
+    - Background retention cleanup job running automatically via Nextcloud cron
+    - Atom One Dark syntax highlighting for 190+ programming languages
+    - Copy to clipboard button on every code block with language badges
     - Smart code paste that auto-detects code snippets and wraps them into markdown blocks
-    - Default Original Image Quality for screenshots and diagrams (Issue #19616 / PR #19919)
-    - File drag-and-drop fix ensuring original files are downloaded (Issue #1766)
     - In-call privacy protections preventing accidental mic leaks on close (Issue #2003)
-    - Web hotkeys (M to mute, V for camera, / to chat)
+    - AI Noise Suppression (RNNoise WASM), Screen &amp; Call Clip Recorder (/record), Meeting Notes (/summary)
+    - Zen Mode (Alt+Z), Canvas Image Optimizer, WebRTC Quality Meter, GIF Picker (/gif), and Pinned Messages
     </description>
-    <version>1.4.0</version>
+    <version>1.5.0</version>
     <licence>agpl</licence>
     <author>Sairento / Huriko</author>
     <namespace>TalkEnhancer</namespace>

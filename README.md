@@ -5,97 +5,136 @@
 [![Nextcloud Version](https://img.shields.io/badge/Nextcloud-25--35-0082c9.svg)](https://apps.nextcloud.com/)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
 
-Oficjalny plugin (aplikacja serwerowa) do chmury Nextcloud, który automatycznie wprowadza zaawansowane ulepszenia i poprawki błędów Nextcloud Talk dla wszystkich użytkowników (w przeglądarce WWW oraz klientach desktopowych) bez konieczności instalowania rozszerzeń po stronie użytkownika.
+Kompleksowa aplikacja serwerowa oraz zestaw rozszerzeń dla chmury Nextcloud, wprowadzający zaawansowane narzędzia administracyjne OCC, silnik webhooków, integrację z lokalnym AI (Ollama), mechanizmy DLP, automatyczną retencję danych oraz zaawansowany interfejs webowy Nextcloud Talk.
 
 ---
 
-## 🚀 Główne funkcje i ulepszenia
+## 🛠️ Narzędzia Serwerowe i Komendy Konsolowe (`occ talk:enhancer:*`)
 
-1. **Zaawansowane kolorowanie składni (Atom One Dark)**:
-   - Pełna obsługa ponad 190 języków programowania: **Python, JavaScript, TypeScript, PowerShell, Bash, SQL, C++, C#, Java, Rust, Go, PHP, HTML, CSS, JSON, YAML, Dockerfile, Diff** itp.
-   - Dedykowane heurystyki dla Pythona (`def`, `import`, `class`, `self`, `print`, `__init__`), PowerShell i SQL zapobiegające błędnej klasyfikacji snippetów.
-2. **Przycisk kopiowania i pobierania snippetów (`📋 Kopiuj` oraz `💾 Pobierz`)**:
-   - Każdy blok kodu otrzymuje przycisk kopiowania do schowka oraz przycisk `💾 Pobierz`, który automatycznie generuje plik z odpowiednim rozszerzeniem (`.py`, `.sql`, `.js`, `.ps1` itd.).
-3. **Zwijanie i rozwijanie długich bloków kodu (>15 linii)**:
-   - Długie logi i skrypty są estetycznie zwijane z przyciskiem `▼ Rozwiń kod (X linii)`, nie zalewając okna czatu.
-4. **Smart Code Paste**:
-   - Wklejenie wielolinijkowego kodu do czatu automatycznie formatuje go w potrójne backticki wraz z wykrytym tagiem języka (np. ```` ```python ````).
-5. **Kontrola prędkości notatek głosowych (1x, 1.25x, 1.5x, 2x)**:
-   - Przycisk pigułki na każdym odtwarzaczu wiadomości głosowych audio umożliwia natychmiastowe przyspieszenie odsłuchu nagrania.
-6. **Automatyczne zapisywanie wersji roboczych (Drafts Persistence)**:
-   - Niewysłana wiadomość w polu edycji jest automatycznie pamiętana w pamięci podręcznej i przywracana po przełączeniu się między pokojami.
-7. **Automatyczny status „W trakcie rozmowy” (Issue #1768)**:
-   - Po dołączeniu do aktywnego połączenia status użytkownika automatycznie przełącza się na `Zajęty / W trakcie rozmowy`, a po zakończeniu rozmowy przywracany jest poprzedni stan.
-8. **Formatowanie Markdown w opisach pokoi (Issue #19738)**:
-   - Nagłówki i opisy rozmów renderują pogrubienia, linki i kod jako sformatowany tekst HTML.
-9. **Nowoczesny wygląd reakcji emoji (Issue #19652)**:
-   - Zwięzłe, animowane pigułki z licznikami reakcji pod dymkami wiadomości.
-10. **Zapamiętywanie jakości zdjęć i domyślna edycja (PR #19919 / Issue #19616 / Issue #19906)**:
-    - Wymusza i zapamiętuje wybór „Oryginalna jakość” oraz domyślne prawo edycji dla wgrywanych dokumentów.
-11. **Płynny skok do cytowanej odpowiedzi (Issue #19905)**:
-    - Kliknięcie cytatu w dymku czatu przewija historię bezpośrednio do wiadomości źródłowej i podświetla ją.
-12. **Wskaźnik poziomu mikrofonu w czasie rzeczywistym (Issue #19904)**:
-    - Wizualny pasek aktywności audio w poczekalni i w trakcie połączenia dający pewność, że mikrofon działa.
-13. **Ochrona po force-mute (PR #19825)**:
-    - Zapobiega natychmiastowemu przypadkowemu odciszeniu po wyciszeniu przez moderatora pokoju.
-14. **Blokada uploadu dla zerowego limitu konta (Issue #19913)**:
-    - Ukrywa przycisk uploadu dla kont z 0 quota, eliminując błędy HTTP 500.
-15. **Hasła szybkich spotkań (PR #19942)**:
-    - Automatycznie generuje i kopiuje bezpieczne hasło przy tworzeniu natychmiastowych spotkań.
-16. **Ochrona przed przypadkowym zamknięciem karty (Issue #2003)**:
-    - Ostrzeżenie w przeglądarce przed zamknięciem lub odświeżeniem karty podczas trwającej rozmowy.
-17. **Skróty klawiszowe w Webie (Issue #19838)**:
-    - `M` (mute/unmute), `V` (kamera wł./wył.), `/` (skok do czatu).
-18. **Pływające okno Picture-in-Picture (PiP / Mini-Player)**:
-    - Zawsze na wierzchu miniaturowe okno aktywnej rozmowy wideo po zminimalizowaniu karty z szybkimi przyciskami wyciszania mikrofonu, kamery i rozłączania.
-19. **Redukcja szumów w czasie rzeczywistym AI (RNNoise WASM / Web Audio)**:
-    - Eliminacja szumów wentylatorów, tła i stukania w klawiaturę bezpośrednio w przeglądarce bez dodatkowych aplikacji.
-20. **Rejestrator wycinków ekranu i rozmowy (Quick Clip Recorder)**:
-    - Nagrywanie wycinków ekranu lub wideo rozmowy z możliwością natychmiastowego pobrania (.webm) lub wysłania na czat.
-21. **Podsumowanie spotkania & Notatki (Smart Meeting Summary)**:
-    - Generowanie raportu Markdown z listą uczestników, transkrypcjami i zadaniami do zrobienia (komenda `/summary`).
-22. **Tryb Zen / Skupienia (Zen Mode `Alt + Z`)**:
-    - Ukrycie belek nawigacyjnych Nextcloud i pełnoekranowy widok rozmowy.
-23. **Lokalny optymalizator zdjęć przed wysyłką (Smart Image Resizer)**:
-    - Automatyczna kompresja i skalowanie ogromnych zdjęć w przeglądarce do 2.5K przed uploadem, oszczędzająca czas i transfer.
-24. **Wskaźnik jakości połączenia i opóźnienia (Ping & Network Quality Meter)**:
-    - Dyskretna kontrolka (zielona / żółta / czerwona) z podglądem pingu WebRTC na żywo.
-25. **Wyszukiwarka animowanych GIF-ów (`/gif`)**:
-    - Komenda `/gif` do natychmiastowego wyboru i wysyłania reakcji.
-26. **Pasek przypiętych wiadomości (Pinned Messages Bar)**:
-    - Pasek na górze pokoju czatu z możliwością przypięcia ważnych komunikatów.
-27. **Bezkonfliktowa współpraca z aplikacją Desktop (`isRunningInDesktopApp`)**:
-    - Skrypt inteligentnie wykrywa uruchomienie wewnątrz aplikacji desktopowej i ustępuje miejsca natywnym funkcjom Electrona, eliminując konflikty.
+Aplikacja dostarcza administratorom Nextcloud dedykowany zestaw poleceń CLI do monitorowania, automatyzacji i zarządzania:
 
----
+### 1. `occ talk:enhancer:stats`
+Generuje przejrzysty raport aktywności i obciążenia serwera Talk w postaci tabeli:
+- Liczba wszystkich pokoi w podziale na 1:1, grupowe i publiczne.
+- Sumaryczna liczba wiadomości oraz wolumen w ostatnich 24h i 7 dniach.
+- Zestawienie 5 najbardziej aktywnych pokoi wraz z tokenami i liczbą postów.
+- Status połączenia z lokalnym silnikiem AI (Ollama) oraz lista dostępnych modeli.
 
-## 📦 Pobieranie i Instalacja
-
-Pobierz najnowsze wydanie z [GitHub Releases](https://github.com/Sairento-92/nextcloud-talk-enhancer/releases/latest):
-* `talk_enhancer.tar.gz`
-* `talk_enhancer.zip`
-
-### 🎯 Sposób 1: Przez Panel WWW Administratora (Bez konsoli)
-
-1. Wypakuj archiwum do katalogu aplikacji Nextclouda:
-   ```bash
-   tar -xzf talk_enhancer.tar.gz -C /var/www/nextcloud/apps/
-   chown -R www-data:www-data /var/www/nextcloud/apps/talk_enhancer
-   ```
-2. Zaloguj się na konto administratora w Nextcloud i przejdź do:
-   👉 **`https://cloud.huriko.com/settings/apps/disabled`** *(Menu -> Aplikacje -> Wyłączone aplikacje)*.
-3. Znajdź pozycję **Talk Enhancer (Fork by Sairento)** i kliknij przycisk **[Włącz]**.
-
-### 💻 Sposób 2: Przez konsolę (CLI)
-
+### 2. `occ talk:enhancer:broadcast`
+Wysyła ogłoszenie administracyjne (np. o pracach serwisowych) bezpośrednio do czatów:
 ```bash
-sudo -u www-data php /var/www/nextcloud/occ app:enable talk_enhancer
+# Wysłanie ogłoszenia do wszystkich pokoi Talk:
+sudo -u www-data php occ talk:enhancer:broadcast --message="⚠️ Serwer zostanie zrestartowany o godzinie 23:30."
+
+# Wysłanie do wybranego pokoju po tokenie:
+sudo -u www-data php occ talk:enhancer:broadcast --room=vloc0j --message="Wiadomość testowa dla zespołu."
+```
+
+### 3. `occ talk:enhancer:cleanup`
+Czyści starą historię rozmów zgodnie z polityką retencji danych:
+```bash
+# Sprawdzenie ile wiadomości kwalifikuje się do usunięcia (bez kasowania):
+sudo -u www-data php occ talk:enhancer:cleanup --days=90 --dry-run
+
+# Usunięcie wiadomości starszych niż 60 dni:
+sudo -u www-data php occ talk:enhancer:cleanup --days=60
+```
+
+### 4. `occ talk:enhancer:export-room`
+Umożliwia archiwizację i zrzut całej historii konwersacji wybranego pokoju do formatu Markdown, JSON lub HTML:
+```bash
+# Eksport pokoju do pliku Markdown:
+sudo -u www-data php occ talk:enhancer:export-room vloc0j --format=md --output=/tmp/historia_projektu.md
+
+# Eksport w formacie JSON z pełnymi metadanymi:
+sudo -u www-data php occ talk:enhancer:export-room vloc0j --format=json
 ```
 
 ---
 
-## 👤 Autor
-- **Autor forka:** Sairento ([@Sairento-92](https://github.com/Sairento-92))
-- **Email:** `jakubbojarski92@gmail.com`
-- **Studio:** Huriko Cloud (`cloud.huriko.com`)
-- **Licencja:** AGPL-3.0
+## 🔗 Silnik Incoming Webhooks (`/api/v1/webhook/{token}`)
+
+Umożliwia integrację z zewnętrznymi systemami (Home Assistant, GitHub, Zabbix, Uptime Kuma, skrypty Bash) w celu natychmiastowego wysyłania alertów na czat Talk:
+
+- **Adres endpointu**: `POST https://twoja-chmura.pl/apps/talk_enhancer/api/v1/webhook/{room_token}`
+- **Komenda na czacie**: Wpisz `/webhook` w dowolnym pokoju Talk, aby otworzyć okno z gotowym adresem URL i kodem integracji.
+
+### Przykład cURL:
+```bash
+curl -X POST "https://cloud.huriko.com/apps/talk_enhancer/api/v1/webhook/vloc0j" \
+  -H "Content-Type: application/json" \
+  -d '{"text": "🚨 Kopia zapasowa bazy danych zakończona sukcesem!", "actorDisplayName": "Backup Bot"}'
+```
+
+### Przykład Home Assistant (`configuration.yaml`):
+```yaml
+rest_command:
+  notify_talk_room:
+    url: "https://cloud.huriko.com/apps/talk_enhancer/api/v1/webhook/vloc0j"
+    method: POST
+    headers:
+      content-type: "application/json"
+    payload: '{"text": "🏠 {{ message }}", "actorDisplayName": "Home Assistant"}'
+```
+
+---
+
+## 🤖 Integracja z Lokalnym AI (Ollama / LocalAI)
+
+Talk Enhancer pozwala na bezpieczne korzystanie z modeli językowych LLM bez wysyłania prywatnych danych do chmury:
+
+- **Komenda na czacie**: Wpisz `/ai <zapytanie>` (np. `/ai Podsumuj czym jest protokół WebRTC`), a serwer odpyta lokalną instancję Ollama i wyświetli odpowiedź w dedykowanym oknie z opcją wklejenia do czatu.
+- **Konfiguracja serwera**:
+  ```bash
+  # Ustawienie adresu lokalnej Ollamy (domyślnie http://127.0.0.1:11434):
+  sudo -u www-data php occ config:app:set talk_enhancer ollama_url --value="http://127.0.0.1:11434"
+
+  # Wybór modelu (np. llama3, mistral, qwen2.5):
+  sudo -u www-data php occ config:app:set talk_enhancer ollama_model --value="llama3"
+  ```
+
+---
+
+## 🔒 Ochrona Przed Wyciekiem Danych (DLP) & Retencja
+
+1. **DLP Scanner**:
+   - Wykrywa wklejanie kluczy prywatnych (`BEGIN RSA PRIVATE KEY`), tokenów dostępowych (OpenAI `sk-...`, GitHub `ghp_...`, AWS `AKIA...`) oraz haseł w URI połączeń baz danych.
+   - Ostrzega użytkownika przed wysłaniem poufnych danych na czat publiczny.
+2. **Automatyczne zadanie w tle (Cron Background Job)**:
+   - Klasa `OCA\TalkEnhancer\BackgroundJob\CleanupJob` uruchamiana automatycznie raz na 24h w procesie `cron.php`.
+   - Konfiguracja automatycznego czyszczenia:
+     ```bash
+     sudo -u www-data php occ config:app:set talk_enhancer auto_cleanup --value="yes"
+     sudo -u www-data php occ config:app:set talk_enhancer retention_days --value="90"
+     ```
+
+---
+
+## 🌐 Kompletny Pakiet Funkcji Webowych dla Użytkowników
+
+1. **AI Noise Suppression (RNNoise WASM)**: Tłumienie hałasów tła i uderzeń w klawiaturę bezpośrednio w przeglądarce.
+2. **Nagrywarka klipów wideo i audio (`/record`)**: Błyskawiczny rejestrator ekranu lub rozmowy.
+3. **Inteligentne notatki i agendy spotkań (`/summary`)**: Generowanie ustaleń i zadań z eksportem do Markdown / PDF.
+4. **Tryb Zen / Skupienia (`Alt + Z`)**: Ukrywanie rozpraszających paneli bocznych.
+5. **Optymalizator zdjęć**: Skalowanie bardzo dużych zdjęć (>2500px) przed wysłaniem na serwer.
+6. **Miernik jakości sieci WebRTC**: Bieżący podgląd ping/RTT, bitrate i utraty pakietów podczas rozmowy.
+7. **Wyszukiwarka GIF-ów (`/gif <hasło>`)**: Podgląd i wstawianie animacji GIF do konwersacji.
+8. **Pasek przypiętych wiadomości**: Wyróżnianie najważniejszych komunikatów u góry pokoju.
+9. **Kierowanie dźwięku na osobny głośnik**: Dzwonek połączenia na głośnikach, rozmowa w słuchawkach (`setSinkId`).
+10. **Atom One Dark Syntax Highlighting**: Kolorowanie składni dla 190+ języków programowania z przyciskami kopiowania i pobierania.
+
+---
+
+## 📦 Instalacja w Chmurze Nextcloud
+
+1. Pobierz archiwum `talk_enhancer.tar.gz` z [najnowszego wydania](https://github.com/Sairento-92/nextcloud-talk-enhancer/releases/latest).
+2. Rozpakuj zawartość do katalogu aplikacji Nextcloud:
+   ```bash
+   cd /var/www/nextcloud/apps/
+   tar -xzf talk_enhancer.tar.gz
+   chown -R www-data:www-data talk_enhancer/
+   ```
+3. Aktywuj aplikację:
+   ```bash
+   sudo -u www-data php occ app:enable talk_enhancer
+   ```

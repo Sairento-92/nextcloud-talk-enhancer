@@ -7,6 +7,9 @@ import { setupNetworkMeterWeb } from './networkMeter.js';
 import { setupGifPickerWeb } from './gifPicker.js';
 import { setupPinnedMessagesWeb } from './pinnedMessages.js';
 import { setupSecondarySpeakerWeb } from './secondarySpeaker.js';
+import { initAiAssistant } from './aiAssistant.js';
+import { initWebhookHelper } from './webhookModal.js';
+import { initDlpClient } from './dlpClient.js';
 import { HURIKO_LOGO } from "./logo.js";
 /**
  * Nextcloud Talk Enhancer - Server App Client Script
@@ -1117,6 +1120,9 @@ function init() {
 	setupGifPickerWeb(isDesktop);
 	setupPinnedMessagesWeb(isDesktop);
 	setupSecondarySpeakerWeb(isDesktop);
+	initAiAssistant();
+	initWebhookHelper();
+	initDlpClient();
 	setupAudioCues();
 	setupCommandPalette();
 	setupChatPolls();
