@@ -10,6 +10,9 @@ import { setupSecondarySpeakerWeb } from './secondarySpeaker.js';
 import { initAiAssistant } from './aiAssistant.js';
 import { initWebhookHelper } from './webhookModal.js';
 import { initDlpClient } from './dlpClient.js';
+import { setupWebSocketWatchdog } from './wsWatchdog.js';
+import { setupBulkAttachmentGrouping } from './bulkAttachments.js';
+import { setupReactionUnreadIndicators } from './reactionUnread.js';
 import { HURIKO_LOGO } from "./logo.js";
 /**
  * Nextcloud Talk Enhancer - Server App Client Script
@@ -1123,6 +1126,9 @@ function init() {
 	initAiAssistant();
 	initWebhookHelper();
 	initDlpClient();
+	setupWebSocketWatchdog();
+	setupBulkAttachmentGrouping();
+	setupReactionUnreadIndicators();
 	setupAudioCues();
 	setupCommandPalette();
 	setupChatPolls();

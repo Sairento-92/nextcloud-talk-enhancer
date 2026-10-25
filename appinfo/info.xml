@@ -20,8 +20,11 @@
     - In-call privacy protections preventing accidental mic leaks on close (Issue #2003)
     - AI Noise Suppression (RNNoise WASM), Screen &amp; Call Clip Recorder (/record), Meeting Notes (/summary)
     - Zen Mode (Alt+Z), Canvas Image Optimizer, WebRTC Quality Meter, GIF Picker (/gif), and Pinned Messages
+    - WebSocket Reverse Proxy Watchdog with silent auto-reconnect (Issue #19994)
+    - Compact Bulk Attachment Gallery view grouping multi-file uploads (PR #19952)
+    - Unread Reaction Indicator for 1-to-1 conversations (Issue #19852)
     </description>
-    <version>1.5.0</version>
+    <version>1.6.0</version>
     <licence>agpl</licence>
     <author>Sairento / Huriko</author>
     <namespace>TalkEnhancer</namespace>
