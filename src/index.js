@@ -792,6 +792,87 @@ function setupMessageDraftsPersistence() {
 /**
  * Initialize
  */
+
+/**
+ * Fix Issue #19738: Render markdown nicely in chat descriptions
+ */
+function setupChatDescriptionMarkdown() {
+	const observer = new MutationObserver(() => {
+		const descEls = document.querySelectorAll('.conversation-header__description:not(.talk-markdown-parsed), .top-bar__description:not(.talk-markdown-parsed)')
+		descEls.forEach((el) => {
+			el.classList.add('talk-markdown-parsed')
+			const text = el.textContent || ''
+			if (text.includes('**') || text.includes('__') || text.includes('`') || text.includes('[') || text.includes('*')) {
+				const html = text
+					.replace(/&/g, '&amp;')
+					.replace(/</g, '&lt;')
+					.replace(/>/g, '&gt;')
+					.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+					.replace(/\*(.*?)\*/g, '<em>$1</em>')
+					.replace(/`([^`]+)`/g, '<code style="background:rgba(255,255,255,0.1);padding:1px 4px;border-radius:3px;">$1</code>')
+					.replace(/\[([^\]]+)\]\((https?:\/\/[^\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" style="color:var(--color-primary-element, #0082c9);text-decoration:underline;">$1</a>')
+				el.innerHTML = html
+			}
+		})
+	})
+	observer.observe(document.body, { childList: true, subtree: true })
+}
+
+/**
+ * Fix Issue #1768: Automatic user status "In a Call" with auto-restore on hangup
+ */
+function setupAutoInCallUserStatus() {
+	if (window.__talk_auto_status_initialized) return
+	window.__talk_auto_status_initialized = true
+
+	let isInCall = false
+	let previousStatus = null
+
+	const checkCallStatus = async () => {
+		const callActive = !!(
+			document.querySelector('.incall, .video-container, [data-call-active="true"]') ||
+			(window.location.hash.includes('/call/') && !window.location.hash.endsWith('/call/'))
+		)
+
+		if (callActive && !isInCall) {
+			isInCall = true
+			console.info('[TalkEnhancer] Active call detected, setting user status to busy / In a call (Issue #1768)')
+			try {
+				const res = await fetch('/ocs/v2.php/apps/user_status/api/v1/user_status', {
+					headers: { 'OCS-APIREQUEST': 'true', Accept: 'application/json' },
+				})
+				if (res.ok) {
+					const data = await res.json()
+					previousStatus = data?.ocs?.data?.status || 'online'
+				}
+				await fetch('/ocs/v2.php/apps/user_status/api/v1/user_status/status', {
+					method: 'PUT',
+					headers: { 'OCS-APIREQUEST': 'true', 'Content-Type': 'application/json' },
+					body: JSON.stringify({ statusType: 'busy', message: 'W trakcie rozmowy' }),
+				})
+			} catch (err) {
+				console.debug('[TalkEnhancer] Could not set in-call status:', err)
+			}
+		} else if (!callActive && isInCall) {
+			isInCall = false
+			console.info('[TalkEnhancer] Call ended, restoring previous user status (Issue #1768):', previousStatus)
+			try {
+				const restoreTo = previousStatus || 'online'
+				await fetch('/ocs/v2.php/apps/user_status/api/v1/user_status/status', {
+					method: 'PUT',
+					headers: { 'OCS-APIREQUEST': 'true', 'Content-Type': 'application/json' },
+					body: JSON.stringify({ statusType: restoreTo, message: '' }),
+				})
+			} catch (err) {
+				console.debug('[TalkEnhancer] Could not restore user status:', err)
+			}
+		}
+	}
+
+	setInterval(checkCallStatus, 3000)
+	window.addEventListener('hashchange', () => setTimeout(checkCallStatus, 500))
+}
+
 function init() {
 	injectBrandingPill()
 	setupSmartCodePaste()
@@ -811,10 +892,14 @@ function init() {
 	setupVoiceMessageSpeedControl()
 	setupMessageDraftsPersistence()
 	enhanceCodeBlocks()
+	setupChatDescriptionMarkdown()
+	setupAutoInCallUserStatus()
 
 	const observer = new MutationObserver(() => {
 		injectBrandingPill()
 		enhanceCodeBlocks()
+	setupChatDescriptionMarkdown()
+	setupAutoInCallUserStatus()
 	})
 	observer.observe(document.body, {
 		childList: true,

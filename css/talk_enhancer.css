@@ -246,3 +246,41 @@ pre:hover .talk-download-code-btn {
 	background: #0082c9;
 	transform: scale(1.05);
 }
+
+/* Refined message bubble reactions pill (Issue #19652) */
+.message__reactions,
+.reactions {
+	display: flex !important;
+	flex-wrap: wrap !important;
+	gap: 4px !important;
+	margin-top: 4px !important;
+}
+
+.reaction,
+.message__reaction {
+	display: inline-flex !important;
+	align-items: center !important;
+	gap: 4px !important;
+	padding: 2px 8px !important;
+	border-radius: 12px !important;
+	background: rgba(255, 255, 255, 0.08) !important;
+	border: 1px solid rgba(255, 255, 255, 0.16) !important;
+	font-size: 12px !important;
+	line-height: 1.2 !important;
+	cursor: pointer !important;
+	user-select: none !important;
+	transition: all 0.15s ease !important;
+}
+
+.reaction:hover,
+.message__reaction:hover {
+	background: rgba(0, 130, 201, 0.25) !important;
+	border-color: rgba(0, 130, 201, 0.6) !important;
+	transform: scale(1.08) !important;
+}
+
+.reaction--active,
+.message__reaction--active {
+	background: rgba(0, 130, 201, 0.35) !important;
+	border-color: #0082c9 !important;
+}
