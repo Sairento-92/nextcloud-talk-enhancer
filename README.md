@@ -62,28 +62,42 @@ talk_enhancer/
 
 ---
 
-## 🛠️ Instalacja na serwerze Nextcloud (`cloud.huriko.com`)
+## 🛠️ Instalacja i Aktywacja w Nextcloud (`cloud.huriko.com`)
 
-### Krok 1: Wypakowanie archiwum na serwerze
+Plugin możesz włączyć na serwerze na dwa wygodne sposoby:
 
-Wypakuj archiwum `talk_enhancer.tar.gz` do katalogu `apps` instalacji Nextcloud:
+### 🎯 Sposób 1: Przez Panel WWW Administratora (Graficzny interfejs, bez konsoli)
+
+1. Wypakuj gotowe archiwum [talk_enhancer.tar.gz](https://github.com/Sairento-92/nextcloud-talk-enhancer/releases/latest/download/talk_enhancer.tar.gz) do katalogu aplikacji Nextclouda:
+   ```bash
+   tar -xzf talk_enhancer.tar.gz -C /var/www/nextcloud/apps/
+   chown -R www-data:www-data /var/www/nextcloud/apps/talk_enhancer
+   ```
+2. Zaloguj się na konto administratora w przeglądarce i otwórz zakładkę:
+   👉 **`https://cloud.huriko.com/settings/apps/disabled`** *(Menu użytkownika -> Aplikacje -> Wyłączone aplikacje)*.
+3. Na liście wyłączonych aplikacji znajdź:
+   > 🧩 **Talk Enhancer (Fork by Sairento)**
+4. Kliknij przycisk **`[ Włącz ]`** (Enable). Plugin zacznie natychmiast działać dla wszystkich użytkowników!
+
+---
+
+### 💻 Sposób 2: Przez Konsolę OCC (Dla administratorów serwera / CLI)
+
+Jeśli wolisz aktywację poleceniem w terminalu:
 
 ```bash
-# Na serwerze w katalogu /var/www/nextcloud/apps:
-tar -xzf talk_enhancer.tar.gz -C /var/www/nextcloud/apps/
-```
-
-### Krok 2: Ustawienie uprawnień i włączenie aplikacji
-
-```bash
-# 1. Uprawnienia dla serwera WWW (np. www-data)
-chown -R www-data:www-data /var/www/nextcloud/apps/talk_enhancer
-
-# 2. Aktywacja aplikacji przez konsolę OCC
+# Tradycyjna instalacja na serwerze Linux:
 sudo -u www-data php /var/www/nextcloud/occ app:enable talk_enhancer
+
+# W przypadku instalacji Docker / Docker Compose:
+docker compose exec -u www-data app php occ app:enable talk_enhancer
 ```
 
-*(W przypadku środowiska Docker: `docker compose exec -u www-data app php occ app:enable talk_enhancer`)*
+---
+
+### 🏪 Sposób 3: Oficjalny sklep Nextcloud App Store (Jedno kliknięcie)
+
+Plugin posiada pełną strukturę zgodną z Nextcloud App Store (`appinfo/info.xml`). Po dodaniu repozytorium na [apps.nextcloud.com](https://apps.nextcloud.com/) każdy administrator może po prostu wpisać w wyszukiwarce aplikacji Nextcloud: **`Talk Enhancer`** i kliknąć **`[ Pobierz i włącz ]`** bezpośrednio w przeglądarce.
 
 ---
 **Autor:** Sairento (Fork by Sairento)  
