@@ -968,7 +968,139 @@ function setupPictureInPicture() {
 	})
 }
 
+/**
+ * Setup Audio Cues (chimes on mute / unmute)
+ */
+function setupAudioCues() {
+	if (isRunningInDesktopApp()) return;
+
+	let audioCtx = null;
+	function getAudioCtx() {
+		if (!audioCtx) {
+			const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+			audioCtx = new AudioContextClass();
+		}
+		if (audioCtx.state === 'suspended') {
+			audioCtx.resume().catch(() => {});
+		}
+		return audioCtx;
+	}
+
+	function playChime(isMuted) {
+		try {
+			const ctx = getAudioCtx();
+			const now = ctx.currentTime;
+			const osc = ctx.createOscillator();
+			const gain = ctx.createGain();
+			osc.type = 'sine';
+
+			if (isMuted) {
+				osc.frequency.setValueAtTime(783.99, now);
+				osc.frequency.exponentialRampToValueAtTime(523.25, now + 0.12);
+			} else {
+				osc.frequency.setValueAtTime(523.25, now);
+				osc.frequency.exponentialRampToValueAtTime(783.99, now + 0.12);
+			}
+			gain.gain.setValueAtTime(0.06, now);
+			gain.gain.exponentialRampToValueAtTime(0.001, now + 0.16);
+			osc.connect(gain);
+			gain.connect(ctx.destination);
+			osc.start(now);
+			osc.stop(now + 0.16);
+		} catch (e) {}
+	}
+
+	let lastMute = null;
+	setInterval(() => {
+		const btn = document.querySelector('.local-audio-control-wrapper button, .audio-control-button, [aria-label*="audio" i], [aria-label*="mikrofon" i]');
+		if (!btn) { lastMute = null; return; }
+		const label = (btn.getAttribute('aria-label') || '').toLowerCase();
+		const isMuted = label.includes('unmute') || label.includes('włącz') || label.includes('enable');
+		if (lastMute !== null && lastMute !== isMuted) {
+			playChime(isMuted);
+		}
+		lastMute = isMuted;
+	}, 400);
+}
+
+/**
+ * Setup Quick Switcher / Command Palette (Ctrl+K)
+ */
+function setupCommandPalette() {
+	if (isRunningInDesktopApp()) return;
+
+	window.addEventListener('keydown', (e) => {
+		if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
+			e.preventDefault();
+			const searchInput = document.querySelector('.header-search__input, .unified-search__trigger, #unified-search');
+			if (searchInput) {
+				searchInput.click();
+				searchInput.focus();
+			}
+		}
+	});
+}
+
+/**
+ * Setup Chat Polls (/poll) in web
+ */
+function setupChatPolls() {
+	if (isRunningInDesktopApp()) return;
+
+	function enhancePolls() {
+		const messageEls = document.querySelectorAll('.message__text, .comment__text, [data-rich-text="true"]');
+		messageEls.forEach((el) => {
+			if (el.getAttribute('data-poll-rendered') === 'true') return;
+			const text = el.textContent || '';
+			if (!text.includes('📊') || !text.includes('ANKIETA:')) return;
+
+			el.setAttribute('data-poll-rendered', 'true');
+			const lines = text.split('\n').map(l => l.trim()).filter(Boolean);
+			const qLine = lines.find(l => l.includes('ANKIETA:')) || '';
+			const question = qLine.replace(/.*ANKIETA:\s*/i, '').replace(/\*+/g, '').trim();
+			const options = lines.filter(l => /^\d+\.\s*(\[.*?\])?/.test(l)).map(l => l.replace(/^\d+\.\s*(\[.*?\])?\s*/, '').trim());
+
+			if (options.length >= 2) {
+				const pollId = 'poll_' + Math.abs(question.split('').reduce((a, b) => ((a << 5) - a) + b.charCodeAt(0), 0));
+				const savedVote = localStorage.getItem('talk_vote_' + pollId);
+
+				const widget = document.createElement('div');
+				widget.style.cssText = 'background:rgba(0,0,0,0.25);border:1px solid rgba(255,255,255,0.15);border-radius:10px;padding:12px;margin:8px 0;max-width:400px;';
+				widget.innerHTML = `
+					<div style="font-weight:700;font-size:14px;margin-bottom:10px;color:#0082c9;">📊 ${question}</div>
+					<div style="display:flex;flex-direction:column;gap:6px;">
+						${options.map((opt, i) => `
+							<button style="background:${savedVote === String(i) ? '#1c364d' : '#232a34'};border:1px solid ${savedVote === String(i) ? '#0082c9' : 'rgba(255,255,255,0.1)'};border-radius:6px;padding:8px 10px;color:white;text-align:left;cursor:pointer;font-size:13px;" data-idx="${i}">
+								${opt} ${savedVote === String(i) ? '✅' : ''}
+							</button>
+						`).join('')}
+					</div>
+					<div style="font-size:11px;opacity:0.6;margin-top:8px;text-align:right;">Kliknij, aby zagłosować</div>
+				`;
+
+				widget.querySelectorAll('button').forEach((btn) => {
+					btn.addEventListener('click', (ev) => {
+						ev.stopPropagation();
+						const idx = btn.getAttribute('data-idx');
+						localStorage.setItem('talk_vote_' + pollId, idx);
+						el.removeAttribute('data-poll-rendered');
+						enhancePolls();
+					});
+				});
+
+				el.innerHTML = '';
+				el.appendChild(widget);
+			}
+		});
+	}
+
+	setInterval(enhancePolls, 1000);
+}
+
 function init() {
+	setupAudioCues();
+	setupCommandPalette();
+	setupChatPolls();
 	setupPictureInPicture();
 	injectBrandingPill()
 	setupSmartCodePaste()
