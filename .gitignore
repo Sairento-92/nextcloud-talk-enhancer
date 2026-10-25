@@ -7,3 +7,5 @@ Thumbs.db
 # Build artifacts (keep dist archives in parent directory)
 *.tmp
 *.log
+*.tar.gz
+*.zip

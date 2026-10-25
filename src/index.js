@@ -1,3 +1,12 @@
+import { setupWebNoiseSuppression } from './noiseSuppression.js';
+import { setupClipRecorderWeb } from './clipRecorder.js';
+import { setupMeetingSummaryWeb } from './meetingSummary.js';
+import { setupZenModeWeb } from './zenMode.js';
+import { setupImageOptimizerWeb } from './imageOptimizer.js';
+import { setupNetworkMeterWeb } from './networkMeter.js';
+import { setupGifPickerWeb } from './gifPicker.js';
+import { setupPinnedMessagesWeb } from './pinnedMessages.js';
+import { setupSecondarySpeakerWeb } from './secondarySpeaker.js';
 import { HURIKO_LOGO } from "./logo.js";
 /**
  * Nextcloud Talk Enhancer - Server App Client Script
@@ -1098,6 +1107,16 @@ function setupChatPolls() {
 }
 
 function init() {
+	const isDesktop = isRunningInDesktopApp();
+	setupWebNoiseSuppression(isDesktop);
+	setupClipRecorderWeb(isDesktop);
+	setupMeetingSummaryWeb(isDesktop);
+	setupZenModeWeb(isDesktop);
+	setupImageOptimizerWeb(isDesktop);
+	setupNetworkMeterWeb(isDesktop);
+	setupGifPickerWeb(isDesktop);
+	setupPinnedMessagesWeb(isDesktop);
+	setupSecondarySpeakerWeb(isDesktop);
 	setupAudioCues();
 	setupCommandPalette();
 	setupChatPolls();

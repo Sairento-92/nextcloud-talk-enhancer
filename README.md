@@ -46,7 +46,25 @@ Oficjalny plugin (aplikacja serwerowa) do chmury Nextcloud, który automatycznie
     - Ostrzeżenie w przeglądarce przed zamknięciem lub odświeżeniem karty podczas trwającej rozmowy.
 17. **Skróty klawiszowe w Webie (Issue #19838)**:
     - `M` (mute/unmute), `V` (kamera wł./wył.), `/` (skok do czatu).
-18. **Bezkonfliktowa współpraca z aplikacją Desktop (`isRunningInDesktopApp`)**:
+18. **Pływające okno Picture-in-Picture (PiP / Mini-Player)**:
+    - Zawsze na wierzchu miniaturowe okno aktywnej rozmowy wideo po zminimalizowaniu karty z szybkimi przyciskami wyciszania mikrofonu, kamery i rozłączania.
+19. **Redukcja szumów w czasie rzeczywistym AI (RNNoise WASM / Web Audio)**:
+    - Eliminacja szumów wentylatorów, tła i stukania w klawiaturę bezpośrednio w przeglądarce bez dodatkowych aplikacji.
+20. **Rejestrator wycinków ekranu i rozmowy (Quick Clip Recorder)**:
+    - Nagrywanie wycinków ekranu lub wideo rozmowy z możliwością natychmiastowego pobrania (.webm) lub wysłania na czat.
+21. **Podsumowanie spotkania & Notatki (Smart Meeting Summary)**:
+    - Generowanie raportu Markdown z listą uczestników, transkrypcjami i zadaniami do zrobienia (komenda `/summary`).
+22. **Tryb Zen / Skupienia (Zen Mode `Alt + Z`)**:
+    - Ukrycie belek nawigacyjnych Nextcloud i pełnoekranowy widok rozmowy.
+23. **Lokalny optymalizator zdjęć przed wysyłką (Smart Image Resizer)**:
+    - Automatyczna kompresja i skalowanie ogromnych zdjęć w przeglądarce do 2.5K przed uploadem, oszczędzająca czas i transfer.
+24. **Wskaźnik jakości połączenia i opóźnienia (Ping & Network Quality Meter)**:
+    - Dyskretna kontrolka (zielona / żółta / czerwona) z podglądem pingu WebRTC na żywo.
+25. **Wyszukiwarka animowanych GIF-ów (`/gif`)**:
+    - Komenda `/gif` do natychmiastowego wyboru i wysyłania reakcji.
+26. **Pasek przypiętych wiadomości (Pinned Messages Bar)**:
+    - Pasek na górze pokoju czatu z możliwością przypięcia ważnych komunikatów.
+27. **Bezkonfliktowa współpraca z aplikacją Desktop (`isRunningInDesktopApp`)**:
     - Skrypt inteligentnie wykrywa uruchomienie wewnątrz aplikacji desktopowej i ustępuje miejsca natywnym funkcjom Electrona, eliminując konflikty.
 
 ---
