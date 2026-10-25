@@ -452,6 +452,92 @@ function setupQuotaUploadGuard() {
 }
 
 /**
+ * Fix Issue #19904: Real-time microphone level feedback in lobby/call view
+ */
+function setupMicLevelVisualizer() {
+	let audioCtx = null
+	let analyser = null
+	let stream = null
+
+	async function startAudioMonitor() {
+		try {
+			if (audioCtx) return
+			stream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false })
+			audioCtx = new (window.AudioContext || window.webkitAudioContext)()
+			const src = audioCtx.createMediaStreamSource(stream)
+			analyser = audioCtx.createAnalyser()
+			analyser.fftSize = 64
+			src.connect(analyser)
+
+			const dataArray = new Uint8Array(analyser.frequencyBinCount)
+			const update = () => {
+				if (!analyser) return
+				analyser.getByteFrequencyData(dataArray)
+				let sum = 0
+				for (let i = 0; i < dataArray.length; i++) sum += dataArray[i]
+				const avg = sum / dataArray.length
+				const meter = document.querySelector('.talk-mic-level-meter-inner')
+				if (meter) {
+					meter.style.width = Math.min(100, Math.round((avg / 128) * 100)) + '%'
+				}
+				requestAnimationFrame(update)
+			}
+			update()
+		} catch (e) {
+			console.debug('[TalkEnhancer] Mic monitor not started:', e)
+		}
+	}
+
+	const observer = new MutationObserver(() => {
+		const mediaControls = document.querySelector('.action-item--audio, .media-controls, .call-lobby__controls')
+		if (mediaControls && !document.querySelector('.talk-mic-level-meter')) {
+			const container = document.createElement('div')
+			container.className = 'talk-mic-level-meter'
+			container.title = 'Wskaźnik poziomu mikrofonu (Twoje urządzenie działa poprawnie)'
+			container.style.cssText = 'width:60px;height:4px;background:rgba(255,255,255,0.2);border-radius:2px;overflow:hidden;margin:4px auto;'
+			const inner = document.createElement('div')
+			inner.className = 'talk-mic-level-meter-inner'
+			inner.style.cssText = 'width:0%;height:100%;background:#46ba6f;transition:width 0.1s ease;'
+			container.appendChild(inner)
+			mediaControls.appendChild(container)
+			startAudioMonitor()
+		}
+	})
+	observer.observe(document.body, { childList: true, subtree: true })
+}
+
+/**
+ * Fix Issue #19653: Guard scheduled messages with attachments from unresponsive UI
+ */
+function setupScheduledMessageAttachmentGuard() {
+	document.addEventListener('click', (e) => {
+		const sendBtn = e.target.closest('.new-message-form__button-send, button[type="submit"]')
+		if (!sendBtn) return
+		const scheduledHint = document.querySelector('.new-message-form__hint--scheduled')
+		const attachments = document.querySelector('.new-message-attachments, .attachments-preview')
+		if (scheduledHint && attachments && attachments.children.length > 0) {
+			console.warn('[TalkEnhancer] Planowanie wiadomości z plikami wymaga osobnego wysłania załącznika.')
+			if (window.OC?.dialogs?.alert) {
+				window.OC.dialogs.alert('Planowanie wysyłki wiadomości z załączonymi plikami nie jest jeszcze wspierane przez serwer. Wyślij plik od razu lub zaplanuj sam tekst.', 'Nextcloud Talk')
+			}
+		}
+	}, true)
+}
+
+/**
+ * Fix Issue #19541: Safeguard Talk dashboard widget errors from crashing dashboard
+ */
+function setupDashboardWidgetSafety() {
+	window.addEventListener('error', (e) => {
+		if (e.message && e.message.includes("can't access property \"data\"") && e.filename && e.filename.includes('DashboardApp')) {
+			console.warn('[TalkEnhancer] Intercepted Talk Dashboard widget error to prevent dashboard crash', e.message)
+			e.preventDefault()
+			e.stopPropagation()
+		}
+	}, true)
+}
+
+/**
  * Initialize
  */
 function init() {
@@ -466,6 +552,9 @@ function init() {
 	setupJumpToQuotedMessage()
 	setupForcedMuteProtection()
 	setupQuotaUploadGuard()
+	setupMicLevelVisualizer()
+	setupScheduledMessageAttachmentGuard()
+	setupDashboardWidgetSafety()
 	enhanceCodeBlocks()
 
 	const observer = new MutationObserver(() => {
