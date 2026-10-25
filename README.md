@@ -9,6 +9,38 @@ Kompleksowa aplikacja serwerowa oraz zestaw rozszerzeń dla chmury Nextcloud, wp
 
 ---
 
+## 🔄 Pełne Zestawienie Zmian Względem Oryginalnego Nextcloud Talk (Upstream)
+
+Poniższa tabela prezentuje bezpośrednie porównanie możliwości oficjalnej aplikacji Nextcloud Talk (`spreed`) z wersją rozszerzoną o `talk_enhancer`:
+
+| Obszar / Moduł | Oryginalny Nextcloud Talk | Nextcloud Talk z Talk Enhancer |
+| :--- | :--- | :--- |
+| **Kolorowanie składni kodu** | Podstawowe/brak, brak wykrywania języków | **Atom One Dark dla 190+ języków** z autowykrywaniem (Python, SQL, JS, Bash, C++, itp.) |
+| **Kopiowanie i pobieranie kodu**| ❌ Brak przycisków w dymkach kodu | **Przyciski `📋 Kopiuj` oraz `💾 Pobierz`** z automatycznym rozszerzeniem pliku |
+| **Zwijanie długiego kodu** | Długie logi zalewają okno czatu | **Automatyczne zwijanie bloków kodu >15 linii** z licznikiem wierszy |
+| **Wklejanie kodu (Smart Paste)**| Wklejenie wstawia czysty tekst | **Automatyczne opakowywanie wieloliniowego kodu w potrójne backticki z tagiem języka** |
+| **Tłumienie szumów AI w Webie**| Podstawowe AGC/echo z przeglądarki | **RNNoise WASM (Web Audio 48 kHz)** eliminujące szum wentylatorów i uderzenia w klawisze |
+| **Rejestrator wycinków ekranu**| ❌ Brak | **Komenda `/record`** – bezpośrednie nagrywanie ekranu/kamery do pliku WebM/MP4 z czatu |
+| **Podsumowania i notatki** | ❌ Brak | **Komenda `/summary`** generująca agendę i listę zadań do Markdown i PDF |
+| **Tryb skupienia (Zen Mode)** | ❌ Brak | **Skrót `Alt + Z`** ukrywający boczne panele i elementy rozpraszające |
+| **Optymalizacja zdjęć Canvas** | Wgrywanie surowych plików (np. 15-25 MB) | **Klientowe skalowanie zdjęć >2500px** przed wysyłką (szybki upload, oszczędność dysku) |
+| **Miernik sieci WebRTC** | ❌ Brak wskaźnika jakości na żywo | **Podgląd na żywo ping/RTT, bitrate i utraty pakietów (packet loss)** podczas rozmowy |
+| **Wyszukiwarka GIF-ów** | ❌ Brak wbudowanego selektora | **Komenda `/gif <hasło>`** z podglądem i wstawianiem animacji GIF bezpośrednio do czatu |
+| **Przypięte wiadomości** | ❌ Brak paska ogłoszeń pokoju | **Górny pasek przypiętych komunikatów** widoczny dla wszystkich uczestników |
+| **Routing dzwonka połączenia** | Wszystkie dźwięki na jednym urządzeniu | **Wybór osobnego głośnika dla dzwonka połączenia (`setSinkId`)** |
+| **Prędkość notatek głosowych** | Odtwarzanie wyłącznie 1.0x | **Pigułka kontroli tempa głosu (1x, 1.25x, 1.5x, 2x)** na odtwarzaczu audio |
+| **Pamięć wersji roboczych** | Przełączenie pokoju kasuje wpisywany tekst | **Automatyczne zapamiętywanie draftów wiadomości** per pokój |
+| **Zabezpieczenie zamknięcia karty**| Przypadkowe odświeżenie rozłącza rozmowę | **Ostrzeżenie przeglądarki przed opuszczeniem aktywnej rozmowy** (Issue #2003) |
+| **Skróty klawiszowe w przeglądarce**| Ograniczone/brak | **Klawisze `M` (mute), `V` (kamera), `/` (skok do pola czatu)** |
+| **Zestaw narzędzi konsolowych OCC**| Tylko podstawowe operacje na pokojach | **`occ talk:enhancer:*`** (`stats`, `broadcast`, `cleanup`, `export-room`) |
+| **Incoming Webhooks** | Wymaga skomplikowanych botów/tokenów | **Prosty webhook URL per pokój** dla Home Assistant, GitHub, Zabbix, cURL |
+| **Lokalny Asystent AI (Ollama)**| ❌ Brak | **Komenda `/ai <pytanie>`** odpytująca lokalny serwer Ollama bez wysyłki danych do chmury |
+| **Panel konfiguracyjny WWW** | ❌ Brak | **Dedykowany panel w Ustawieniach Administracyjnych Nextcloud** (`Rozmowa`) |
+| **Ochrona poufnych danych (DLP)**| ❌ Brak filtrów kluczy i haseł | **Wykrywanie i blokada/maskowanie kluczy prywatnych, tokenów OpenAI/GitHub/AWS** |
+| **Automatyczna retencja w tle** | Ręczne usuwanie | **Zadanie `CleanupJob` w cronie** automatycznie czyszczące stare wiadomości |
+
+---
+
 ## 📦 Instalacja i Wdrożenie (Krok po kroku)
 
 Aby aplikacja pojawiła się w Panelu Administratora Nextcloud, jej katalog musi znaleźć się w folderze `apps/` instancji Nextcloud.
@@ -161,18 +193,3 @@ rest_command:
    - Ostrzega użytkownika przed wysłaniem poufnych danych na czacie.
 2. **Automatyczne zadanie w tle (Cron Background Job)**:
    - Klasa `OCA\TalkEnhancer\BackgroundJob\CleanupJob` uruchamiana automatycznie raz na 24h w procesie `cron.php`.
-
----
-
-## 🌐 Kompletny Pakiet Funkcji Webowych dla Użytkowników
-
-1. **AI Noise Suppression (RNNoise WASM)**: Tłumienie hałasów tła i uderzeń w klawiaturę bezpośrednio w przeglądarce.
-2. **Nagrywarka klipów wideo i audio (`/record`)**: Błyskawiczny rejestrator ekranu lub rozmowy.
-3. **Inteligentne notatki i agendy spotkań (`/summary`)**: Generowanie ustaleń i zadań z eksportem do Markdown / PDF.
-4. **Tryb Zen / Skupienia (`Alt + Z`)**: Ukrywanie rozpraszających paneli bocznych.
-5. **Optymalizator zdjęć**: Skalowanie bardzo dużych zdjęć (>2500px) przed wysłaniem na serwer.
-6. **Miernik jakości sieci WebRTC**: Bieżący podgląd ping/RTT, bitrate i utraty pakietów podczas rozmowy.
-7. **Wyszukiwarka GIF-ów (`/gif <hasło>`)**: Podgląd i wstawianie animacji GIF do konwersacji.
-8. **Pasek przypiętych wiadomości**: Wyróżnianie najważniejszych komunikatów u góry pokoju.
-9. **Kierowanie dźwięku na osobny głośnik**: Dzwonek połączenia na głośnikach, rozmowa w słuchawkach (`setSinkId`).
-10. **Atom One Dark Syntax Highlighting**: Kolorowanie składni dla 190+ języków programowania z przyciskami kopiowania i pobierania.
