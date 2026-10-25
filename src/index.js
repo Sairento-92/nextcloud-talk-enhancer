@@ -873,7 +873,103 @@ function setupAutoInCallUserStatus() {
 	window.addEventListener('hashchange', () => setTimeout(checkCallStatus, 500))
 }
 
+/**
+ * Setup Picture-in-Picture for web calls
+ */
+function setupPictureInPicture() {
+	if (isRunningInDesktopApp()) {
+		return
+	}
+
+	let activePipWindow = null
+
+	function isCallActive() {
+		const hash = window.location.hash || ''
+		return (hash.includes('/call/') && !hash.endsWith('/call/')) ||
+			!!document.querySelector('.incall, .video-container, .hangup, [data-call-active="true"]')
+	}
+
+	async function openPip() {
+		if (!isCallActive() || (activePipWindow && !activePipWindow.closed)) return
+
+		const dPip = window.documentPictureInPicture
+		if (dPip && typeof dPip.requestWindow === 'function') {
+			try {
+				const pipWin = await dPip.requestWindow({ width: 340, height: 220 })
+				activePipWindow = pipWin
+
+				const videoEl = document.querySelector('video')
+				const titleEl = document.querySelector('.conversation-name, .call-header__title, h1')
+				const title = titleEl ? titleEl.textContent.trim() : 'Nextcloud Talk Call'
+
+				const style = pipWin.document.createElement('style')
+				style.textContent = `
+					* { margin:0; padding:0; box-sizing:border-box; font-family:system-ui, -apple-system, sans-serif; }
+					body { background:#111418; color:#eee; width:100vw; height:100vh; display:flex; flex-direction:column; overflow:hidden; }
+					.header { height:30px; background:rgba(0,0,0,0.7); display:flex; align-items:center; padding:0 10px; font-size:12px; font-weight:600; color:#0082c9; }
+					.video-box { flex:1; background:#1b1f24; display:flex; align-items:center; justify-content:center; }
+					video { width:100%; height:100%; object-fit:cover; }
+					.controls { height:44px; background:#181c22; display:flex; align-items:center; justify-content:center; gap:10px; border-top:1px solid #333; }
+					button { background:#2a303c; border:none; color:white; width:32px; height:32px; border-radius:50%; cursor:pointer; font-size:14px; }
+					button.danger { background:#e9322d; }
+				`
+				pipWin.document.head.appendChild(style)
+
+				pipWin.document.body.innerHTML = `
+					<div class="header"><span>\${title}</span></div>
+					<div class="video-box">\${videoEl && videoEl.srcObject ? '<video autoplay playsinline muted></video>' : '<div style="font-size:32px;">📞</div>'}</div>
+					<div class="controls">
+						<button id="pip-m" title="Mikrofon">🎙️</button>
+						<button id="pip-v" title="Kamera">📹</button>
+						<button id="pip-r" title="Przywróć">🗖</button>
+						<button id="pip-h" class="danger" title="Rozłącz">❌</button>
+					</div>
+				`
+
+				const pipVid = pipWin.document.querySelector('video')
+				if (pipVid && videoEl && videoEl.srcObject) {
+					pipVid.srcObject = videoEl.srcObject
+					pipVid.play().catch(() => {})
+				}
+
+				pipWin.document.getElementById('pip-m')?.addEventListener('click', () => {
+					const btn = document.querySelector('.local-audio-control-wrapper button, .audio-control-button, [aria-label*="audio" i], [aria-label*="mikrofon" i]')
+					btn ? btn.click() : window.dispatchEvent(new KeyboardEvent('keydown', { key: 'm', code: 'KeyM', bubbles: true }))
+				})
+				pipWin.document.getElementById('pip-v')?.addEventListener('click', () => {
+					const btn = document.querySelector('.local-video-control-wrapper button, .video-control-button, [aria-label*="video" i], [aria-label*="kamera" i]')
+					btn ? btn.click() : window.dispatchEvent(new KeyboardEvent('keydown', { key: 'v', code: 'KeyV', bubbles: true }))
+				})
+				pipWin.document.getElementById('pip-r')?.addEventListener('click', () => {
+					window.focus()
+					pipWin.close()
+				})
+				pipWin.document.getElementById('pip-h')?.addEventListener('click', () => {
+					const hangup = document.querySelector('.hangup, button[aria-label*="Opuść" i], button[aria-label*="Hang up" i], button[aria-label*="Leave" i]')
+					hangup?.click()
+					pipWin.close()
+				})
+				return
+			} catch (e) {
+				console.warn('[TalkEnhancer] Document PiP fallback to HTML5 video PiP:', e)
+			}
+		}
+
+		const vid = document.querySelector('video')
+		if (vid && typeof vid.requestPictureInPicture === 'function') {
+			vid.requestPictureInPicture().catch(() => {})
+		}
+	}
+
+	document.addEventListener('visibilitychange', () => {
+		if (document.visibilityState === 'hidden' && isCallActive() && !activePipWindow) {
+			openPip()
+		}
+	})
+}
+
 function init() {
+	setupPictureInPicture();
 	injectBrandingPill()
 	setupSmartCodePaste()
 	setupCallExitProtection()
