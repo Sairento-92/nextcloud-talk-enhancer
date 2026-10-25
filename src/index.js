@@ -7,6 +7,17 @@ import { HURIKO_LOGO } from "./logo.js";
 
 import hljs from 'highlight.js'
 
+/**
+ * Detect whether the script is running inside Nextcloud Talk Desktop (Electron)
+ */
+function isRunningInDesktopApp() {
+	return !!(
+		(typeof window !== 'undefined' && (window.TALK_DESKTOP || window.systemInfo || window.IS_TALK_DESKTOP)) ||
+		(typeof navigator !== 'undefined' && /Electron|NextcloudTalk/i.test(navigator.userAgent))
+	)
+}
+
+
 const COMMON_LANGUAGES = [
 	'python', 'javascript', 'typescript', 'bash', 'powershell',
 	'json', 'html', 'xml', 'css', 'scss', 'sql', 'php', 'c', 'cpp',
@@ -106,8 +117,14 @@ function highlightCode(codeText, classNames = '') {
 function enhanceCodeBlocks(root = document) {
 	const codeBlocks = root.querySelectorAll('pre code:not(.talk-highlighted)')
 	codeBlocks.forEach((codeEl) => {
+		const preEl = codeEl.parentElement
+		if (codeEl.dataset.talkHighlighted || (preEl && (preEl.querySelector('.talk-code-header-bar') || preEl.dataset.talkCodeEnhanced))) {
+			return
+		}
+		codeEl.dataset.talkHighlighted = 'true'
+		codeEl.classList.add('talk-highlighted')
+		if (preEl) preEl.dataset.talkCodeEnhanced = 'true'
 		const code = codeEl
-		code.classList.add('talk-highlighted')
 
 		const rawText = code.textContent || code.innerText || ''
 		if (!rawText.trim()) return
@@ -118,7 +135,7 @@ function enhanceCodeBlocks(root = document) {
 		code.innerHTML = highlighted.html
 		code.className = `hljs language-${highlighted.lang} talk-highlighted`
 
-		const preEl = code.parentElement
+// preEl already declared
 		if (preEl && preEl.tagName === 'PRE' && !preEl.querySelector('.talk-code-header-bar')) {
 			preEl.style.position = 'relative'
 
@@ -217,6 +234,12 @@ function enhanceCodeBlocks(root = document) {
  * Smart code paste
  */
 function setupSmartCodePaste() {
+	if (window.__talk_smart_paste_initialized) return
+	if (isRunningInDesktopApp()) {
+		console.debug('[TalkEnhancer] Running inside Desktop app: smart paste delegated to native desktop app.')
+		return
+	}
+	window.__talk_smart_paste_initialized = true
 	document.addEventListener('paste', (e) => {
 		const target = e.target
 		if (!target) return
@@ -273,6 +296,10 @@ function setupSmartCodePaste() {
  * Call Exit Privacy Confirmation (Resolves Issue #2003)
  */
 function setupCallExitProtection() {
+	if (isRunningInDesktopApp()) {
+		console.debug('[TalkEnhancer] Running inside Desktop app: call exit warning handled by native Electron tray dialog.')
+		return
+	}
 	window.addEventListener('beforeunload', (e) => {
 		const hasActiveCall =
 			document.querySelector('.incall') !== null ||
@@ -398,6 +425,10 @@ function setupFileDragAndDropFix() {
  * Fix Issue #19838: Web Hotkeys (Mute, Video, Search)
  */
 function setupWebHotkeys() {
+	if (isRunningInDesktopApp()) {
+		console.debug('[TalkEnhancer] Running inside Desktop app: native global shortcuts take precedence.')
+		return
+	}
 	document.addEventListener('keydown', (e) => {
 		const target = e.target
 		const isTyping =
@@ -440,6 +471,7 @@ function setupSignalingAutoReconnect() {
  * Inject Huriko & Fork by Sairento Branding in Header
  */
 function injectBrandingPill() {
+	if (isRunningInDesktopApp()) return
 	if (document.querySelector('.huriko-fork-pill')) return
 
 	const targetContainer = document.querySelector('.header-left, .app-header, #app-navigation, .header-appname')
@@ -458,6 +490,10 @@ function injectBrandingPill() {
  * Fix Issue #1757: Image Viewer rotation buttons in Web Talk
  */
 function setupImageViewerRotation() {
+	if (isRunningInDesktopApp()) {
+		console.debug('[TalkEnhancer] Running inside Desktop app: ViewerApp native Vue rotation buttons active.')
+		return
+	}
 	let currentRotation = 0
 	const observer = new MutationObserver(() => {
 		const viewer = document.querySelector('#viewer, .viewer-modal, [class*="viewer-modal"], .viewer-wrapper, .viewer')
@@ -565,6 +601,8 @@ function setupQuotaUploadGuard() {
  * Fix Issue #19904: Real-time microphone level feedback in lobby/call view
  */
 function setupMicLevelVisualizer() {
+	if (window.__talk_mic_visualizer_initialized) return
+	window.__talk_mic_visualizer_initialized = true
 	let audioCtx = null
 	let analyser = null
 	let stream = null
@@ -651,6 +689,8 @@ function setupDashboardWidgetSafety() {
  * Voice Message playback speed control (1x, 1.25x, 1.5x, 2x)
  */
 function setupVoiceMessageSpeedControl() {
+	if (window.__talk_voice_speed_initialized) return
+	window.__talk_voice_speed_initialized = true
 	const RATES = [1.0, 1.25, 1.5, 2.0]
 	const observer = new MutationObserver(() => {
 		const audios = document.querySelectorAll('audio:not(.talk-speed-enhanced)')
@@ -685,6 +725,8 @@ function setupVoiceMessageSpeedControl() {
  * Auto-save unsent message drafts per conversation (Drafts Persistence)
  */
 function setupMessageDraftsPersistence() {
+	if (window.__talk_drafts_initialized) return
+	window.__talk_drafts_initialized = true
 	let currentToken = ''
 	const getRoomToken = () => {
 		const hash = window.location.hash
