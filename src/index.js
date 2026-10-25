@@ -231,26 +231,78 @@ function setupCallExitProtection() {
 }
 
 /**
- * Fix Issue #19616 / PR #19919: Remember Original Image Quality Choice
+ * Fix Issue #19616 / PR #19919 & Issue #19906: Remember Image Quality & Default "Allow editing of uploaded files"
  */
 function setupImageQualityMemory() {
 	try {
 		if (localStorage.getItem('skipCompression') === null) {
 			localStorage.setItem('skipCompression', 'true')
 		}
+		if (localStorage.getItem('allowUpdate') === null) {
+			localStorage.setItem('allowUpdate', 'true')
+		}
 	} catch (e) {}
 
 	const observer = new MutationObserver(() => {
 		const uploadEditor = document.querySelector('.upload-editor, .attachments-preview')
 		if (uploadEditor) {
+			// Image quality (PR #19919 / Issue #19616)
 			const highQualityRadio = uploadEditor.querySelector('input[type="radio"][value="high"], input[type="radio"][value="original"]')
 			if (highQualityRadio && !highQualityRadio.checked && !highQualityRadio.dataset.autoSelected) {
 				highQualityRadio.dataset.autoSelected = 'true'
 				highQualityRadio.click()
 			}
+
+			// Issue #19906: Default "Allow editing of uploaded files" toggle
+			const editableOption = uploadEditor.querySelector('input[type="radio"][value="editable"], input[type="checkbox"][name*="allowUpdate"], input[name*="edit"]')
+			if (editableOption && !editableOption.checked && !editableOption.dataset.autoSelected) {
+				editableOption.dataset.autoSelected = 'true'
+				editableOption.click()
+			}
 		}
 	})
 	observer.observe(document.body, { childList: true, subtree: true })
+}
+
+/**
+ * Fix Issue #19839: Configurable default conversation on Talk startup
+ */
+function setupDefaultConversation() {
+	try {
+		const defaultToken = localStorage.getItem('talk_default_conversation_token')
+		if (defaultToken && (window.location.pathname.endsWith('/apps/spreed') || window.location.pathname.endsWith('/apps/spreed/'))) {
+			if (!window.location.hash || window.location.hash === '#' || window.location.hash === '#/') {
+				console.info('[TalkEnhancer] Navigating to configured default conversation:', defaultToken)
+				window.location.hash = '#/call/' + defaultToken
+			}
+		}
+
+		// Add "Set as default conversation" button to room header / actions
+		const addDefaultRoomBtn = () => {
+			const headerActions = document.querySelector('.conversation-header__actions, .top-bar__actions')
+			if (headerActions && !document.querySelector('.talk-set-default-room-btn')) {
+				const btn = document.createElement('button')
+				btn.className = 'talk-set-default-room-btn'
+				btn.title = 'Ustaw ten czat jako domyślny przy uruchomieniu Talk'
+				btn.style.cssText = 'background:transparent;border:none;cursor:pointer;font-size:16px;padding:4px 8px;opacity:0.7;'
+				btn.innerHTML = '📌'
+				btn.onclick = () => {
+					const currentHash = window.location.hash
+					const match = currentHash.match(/call\/([a-zA-Z0-9_-]+)/)
+					if (match) {
+						localStorage.setItem('talk_default_conversation_token', match[1])
+						btn.style.opacity = '1'
+						if (window.OC?.dialogs?.info) {
+							window.OC.dialogs.info('Ten czat został pomyślnie ustawiony jako domyślny przy starcie!', 'Nextcloud Talk')
+						}
+					}
+				}
+				headerActions.prepend(btn)
+			}
+		}
+		const observer = new MutationObserver(addDefaultRoomBtn)
+		observer.observe(document.body, { childList: true, subtree: true })
+	} catch (e) {}
 }
 
 /**
@@ -555,6 +607,7 @@ function init() {
 	setupMicLevelVisualizer()
 	setupScheduledMessageAttachmentGuard()
 	setupDashboardWidgetSafety()
+	setupDefaultConversation()
 	enhanceCodeBlocks()
 
 	const observer = new MutationObserver(() => {
