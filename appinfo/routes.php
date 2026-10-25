@@ -16,6 +16,9 @@ return [
         ['name' => 'ai#ask', 'url' => '/api/v1/ai/ask', 'verb' => 'POST'],
         ['name' => 'ai#status', 'url' => '/api/v1/ai/status', 'verb' => 'GET'],
         
+        // Admin Settings
+        ['name' => 'admin#saveSettings', 'url' => '/api/v1/admin/settings', 'verb' => 'POST'],
+
         // Server Statistics & DLP Check
         ['name' => 'stats#getOverview', 'url' => '/api/v1/stats', 'verb' => 'GET'],
         ['name' => 'dlp#scan', 'url' => '/api/v1/dlp/scan', 'verb' => 'POST'],

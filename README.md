@@ -5,13 +5,35 @@
 [![Nextcloud Version](https://img.shields.io/badge/Nextcloud-25--35-0082c9.svg)](https://apps.nextcloud.com/)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](LICENSE)
 
-Kompleksowa aplikacja serwerowa oraz zestaw rozszerzeń dla chmury Nextcloud, wprowadzający zaawansowane narzędzia administracyjne OCC, silnik webhooków, integrację z lokalnym AI (Ollama), mechanizmy DLP, automatyczną retencję danych oraz zaawansowany interfejs webowy Nextcloud Talk.
+Kompleksowa aplikacja serwerowa oraz zestaw rozszerzeń dla chmury Nextcloud, wprowadzający panel konfiguracyjny w Ustawieniach Administratora WWW, zaawansowane narzędzia OCC, silnik webhooków, integrację z lokalnym AI (Ollama), mechanizmy DLP, automatyczną retencję danych oraz zaawansowany interfejs webowy Nextcloud Talk.
 
 ---
 
-## 🛠️ Narzędzia Serwerowe i Komendy Konsolowe (`occ talk:enhancer:*`)
+## 🖥️ Instalacja i Aktywacja przez Panel Administratora (Web UI)
 
-Aplikacja dostarcza administratorom Nextcloud dedykowany zestaw poleceń CLI do monitorowania, automatyzacji i zarządzania:
+Aplikacja jest w pełni przystosowana do zarządzania z poziomu przeglądarki WWW bez konieczności używania terminala:
+
+### Krok 1: Włączenie aplikacji w panelu
+1. Zaloguj się do chmury Nextcloud na konto z uprawnieniami administratora.
+2. Kliknij swój awatar w prawym górnym rogu ekranu i wybierz **Aplikacje** (`/settings/apps`).
+3. W lewym menu przejdź do sekcji **Wyłączone aplikacje** (lub wpisz w wyszukiwarkę: `Talk Enhancer`).
+4. Przy pozycji **Talk Enhancer (Fork by Sairento)** kliknij przycisk **Włącz** (w razie komunikatu o aplikacji spoza oficjalnego sklepu kliknij *„Włącz nieprzetestowaną aplikację”*).
+5. Aplikacja zostanie natychmiast aktywowana dla wszystkich użytkowników chmury!
+
+### Krok 2: Konfiguracja w Ustawieniach Administracyjnych
+1. Przejdź do **Ustawień administracyjnych** (Awatar w prawym górnym rogu ➔ *Ustawienia administracyjne*).
+2. W menu bocznym po lewej stronie wybierz sekcję **Rozmowa** (lub *Talk Enhancer*).
+3. W dedykowanym graficznym formularzu możesz:
+   - 🤖 **Skonfigurować adres serwera Ollama** (np. `http://127.0.0.1:11434`) oraz wybrać domyślny model AI (`llama3`, `mistral`, `qwen2.5`).
+   - 🟢 **Sprawdzić status połączenia z AI na żywo** (wskaźnik ONLINE/OFFLINE oraz lista wykrytych modeli).
+   - 🔒 **Włączyć automatyczną politykę retencji** i ustawić maksymalny wiek wiadomości w dniach (np. 90 dni).
+   - Kliknąć **„Zapisz ustawienia”** – konfiguracja zostanie natychmiast zaktualizowana w systemie.
+
+---
+
+## 🛠️ Narzędzia Konsolowe OCC (`occ talk:enhancer:*`)
+
+Dla administratorów preferujących wiersz poleceń lub automatyzację skryptową dostępne są dedykowane komendy:
 
 ### 1. `occ talk:enhancer:stats`
 Generuje przejrzysty raport aktywności i obciążenia serwera Talk w postaci tabeli:
@@ -84,12 +106,9 @@ rest_command:
 Talk Enhancer pozwala na bezpieczne korzystanie z modeli językowych LLM bez wysyłania prywatnych danych do chmury:
 
 - **Komenda na czacie**: Wpisz `/ai <zapytanie>` (np. `/ai Podsumuj czym jest protokół WebRTC`), a serwer odpyta lokalną instancję Ollama i wyświetli odpowiedź w dedykowanym oknie z opcją wklejenia do czatu.
-- **Konfiguracja serwera**:
+- **Konfiguracja**: W Panelu Administratora WWW (**Ustawienia administracyjne ➔ Rozmowa**) lub przez wiersz poleceń:
   ```bash
-  # Ustawienie adresu lokalnej Ollamy (domyślnie http://127.0.0.1:11434):
   sudo -u www-data php occ config:app:set talk_enhancer ollama_url --value="http://127.0.0.1:11434"
-
-  # Wybór modelu (np. llama3, mistral, qwen2.5):
   sudo -u www-data php occ config:app:set talk_enhancer ollama_model --value="llama3"
   ```
 
@@ -102,11 +121,6 @@ Talk Enhancer pozwala na bezpieczne korzystanie z modeli językowych LLM bez wys
    - Ostrzega użytkownika przed wysłaniem poufnych danych na czat publiczny.
 2. **Automatyczne zadanie w tle (Cron Background Job)**:
    - Klasa `OCA\TalkEnhancer\BackgroundJob\CleanupJob` uruchamiana automatycznie raz na 24h w procesie `cron.php`.
-   - Konfiguracja automatycznego czyszczenia:
-     ```bash
-     sudo -u www-data php occ config:app:set talk_enhancer auto_cleanup --value="yes"
-     sudo -u www-data php occ config:app:set talk_enhancer retention_days --value="90"
-     ```
 
 ---
 
@@ -125,16 +139,17 @@ Talk Enhancer pozwala na bezpieczne korzystanie z modeli językowych LLM bez wys
 
 ---
 
-## 📦 Instalacja w Chmurze Nextcloud
+## 📦 Alternatywna Instalacja Ręczna (SSH / Terminal)
 
+Jeśli wgrywasz aplikację po raz pierwszy na własny serwer bez dostępu do App Store:
 1. Pobierz archiwum `talk_enhancer.tar.gz` z [najnowszego wydania](https://github.com/Sairento-92/nextcloud-talk-enhancer/releases/latest).
-2. Rozpakuj zawartość do katalogu aplikacji Nextcloud:
+2. Rozpakuj do katalogu `apps/` Nextcloud:
    ```bash
    cd /var/www/nextcloud/apps/
    tar -xzf talk_enhancer.tar.gz
    chown -R www-data:www-data talk_enhancer/
    ```
-3. Aktywuj aplikację:
+3. Przejdź do **Panelu Administratora ➔ Aplikacje** i kliknij **Włącz**, lub aktywuj przez CLI:
    ```bash
    sudo -u www-data php occ app:enable talk_enhancer
    ```

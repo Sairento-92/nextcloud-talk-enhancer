@@ -13,6 +13,7 @@ use OCA\TalkEnhancer\Command\BroadcastCommand;
 use OCA\TalkEnhancer\Command\CleanupCommand;
 use OCA\TalkEnhancer\Command\ExportRoomCommand;
 use OCA\TalkEnhancer\Command\StatsCommand;
+use OCA\TalkEnhancer\Settings\Admin;
 use OCP\AppFramework\App;
 use OCP\AppFramework\Bootstrap\IBootContext;
 use OCP\AppFramework\Bootstrap\IBootstrap;
@@ -27,6 +28,9 @@ class Application extends App implements IBootstrap {
     }
 
     public function register(IRegistrationContext $context): void {
+        // Register Admin Settings in Web Panel
+        $context->registerAdminSettings(Admin::class);
+
         // Register OCC Console Commands
         $context->registerCommand(StatsCommand::class);
         $context->registerCommand(BroadcastCommand::class);
