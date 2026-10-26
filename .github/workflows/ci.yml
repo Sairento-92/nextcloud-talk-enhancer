@@ -1,0 +1,53 @@
+name: CI & Build Release
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  test:
+    name: PHP Lint & JS Test Suite
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: PHP Syntax Check (All Files)
+        run: |
+          find lib/ -name "*.php" -exec php -l {} +
+
+      - name: Run Automated JS Test Suite
+        run: |
+          node test_runner.js
+
+      - name: Build Nextcloud App Package
+        run: |
+          npm install --package-lock-only || true
+          npm run build || true
+
+      - name: Upload Release Assets
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            talk_enhancer.tar.gz
+            talk_enhancer.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
