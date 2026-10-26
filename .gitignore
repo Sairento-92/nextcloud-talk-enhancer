@@ -5,6 +5,7 @@ Thumbs.db
 .vscode/
 
 # Build artifacts (keep dist archives in parent directory)
+dist/
 *.tmp
 *.log
 *.tar.gz

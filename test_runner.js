@@ -117,6 +117,16 @@ const tests = [
         name: 'Dostępność AudioContext / Soundboard mocks w środowisku',
         pass: true,
         detail: 'Moduły dźwiękowe i transkrypcji AI załadowane pomyślnie'
+    },
+    {
+        name: 'Obsługa pamięci zaplanowanych wiadomości (ScheduledMessages storage)',
+        pass: (() => {
+            mockContext.localStorage.setItem('te_scheduled_messages', JSON.stringify([{ id: 'msg_1', text: 'Test', sendTime: Date.now() + 60000, roomToken: 'room_123' }]));
+            const raw = mockContext.localStorage.getItem('te_scheduled_messages');
+            const list = JSON.parse(raw);
+            return Array.isArray(list) && list.length === 1 && list[0].text === 'Test';
+        })(),
+        detail: 'Magazyn lokalny zaplanowanych wiadomości działa prawidłowo'
     }
 ];
 
@@ -132,7 +142,7 @@ tests.forEach((t, i) => {
 
 console.log('\n-------------------------------------------------------------');
 if (allPassed) {
-    console.log('✅ WSZYSTKIE TESTY TALK ENHANCER ZAKOŃCZONE POWODZENIEM (3/3)');
+    console.log(`✅ WSZYSTKIE TESTY TALK ENHANCER ZAKOŃCZONE POWODZENIEM (${tests.length}/${tests.length})`);
 } else {
     console.log('❌ NIEKTÓRE TESTY NIE PRZESZŁY.');
     process.exit(1);

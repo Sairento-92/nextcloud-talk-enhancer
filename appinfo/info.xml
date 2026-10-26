@@ -23,8 +23,10 @@
     - WebSocket Reverse Proxy Watchdog with silent auto-reconnect (Issue #19994)
     - Compact Bulk Attachment Gallery view grouping multi-file uploads (PR #19952)
     - Unread Reaction Indicator for 1-to-1 conversations (Issue #19852)
+    - Współdzielona Tablica do Rysowania (Interactive Whiteboard) z narzędziami szkicowania, kształtów i eksportem PNG
+    - Planowanie Wysyłki Wiadomości (Scheduled Messages) z automatycznym wysyłaniem w zadanym czasie
     </description>
-    <version>1.6.0</version>
+    <version>1.7.0</version>
     <licence>agpl</licence>
     <author>Sairento / Huriko</author>
     <namespace>TalkEnhancer</namespace>

@@ -13,6 +13,8 @@ import { initDlpClient } from './dlpClient.js';
 import { setupWebSocketWatchdog } from './wsWatchdog.js';
 import { setupBulkAttachmentGrouping } from './bulkAttachments.js';
 import { setupReactionUnreadIndicators } from './reactionUnread.js';
+import { Whiteboard } from './whiteboard.js';
+import { ScheduledMessages } from './scheduledMessages.js';
 import { HURIKO_LOGO } from "./logo.js";
 /**
  * Nextcloud Talk Enhancer - Server App Client Script
@@ -1133,6 +1135,8 @@ function init() {
 	setupCommandPalette();
 	setupChatPolls();
 	setupPictureInPicture();
+	new Whiteboard();
+	new ScheduledMessages();
 	injectBrandingPill()
 	setupSmartCodePaste()
 	setupCallExitProtection()
